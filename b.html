@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(45deg, #ff6f61, #deff8a, #61a3ff);
+            background-size: 300% 300%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px #000000;
+        }
+        
+        .date-container {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px #000000;
+        }
+        
+        .stopwatch {
+            background-color: rgba(0, 0, 0, 0.3); /* Semi-transparent background */
+            border-radius: 10px;
+            padding: 20px;
+            display: inline-block;
+        }
+        
+        .display {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #ffffff;
+            background-color: #61a3ff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #5194e3;
+        }
+        
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2em;
+            }
+        
+            .date-container {
+                font-size: 1em;
+            }
+        
+            .display {
+                font-size: 2em;
+            }
+        
+            button {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stopwatch</h1>
+        <div class="date-container" id="dateContainer"></div> <!-- New date container -->
+        <div class="stopwatch">
+            <div class="display">
+                <span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>:<span id="milliseconds">000</span>
+            </div>
+            <div class="controls">
+                <button id="startBtn">Start</button>
+                <button id="pauseBtn">Pause</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hoursElement = document.getElementById('hours');
+        const minutesElement = document.getElementById('minutes');
+        const secondsElement = document.getElementById('seconds');
+        const millisecondsElement = document.getElementById('milliseconds');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let stopwatchInterval;
+        let startTime;
+        let pausedTime = 0;
+
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        function startTimer() {
+            if (!stopwatchInterval) {
+                console.log('Starting timer');
+                startTime = Date.now() - pausedTime;
+                stopwatchInterval = setInterval(updateTime, 10);
+                console.log('Timer started');
+            } else {
+                console.log('Timer already running');
+            }
+        }
+
+        function pauseTimer() {
+            if (stopwatchInterval) {
+                console.log('Pausing timer');
+                clearInterval(stopwatchInterval);
+                stopwatchInterval = null;
+                pausedTime = Date.now() - startTime;
+                console.log('Timer paused');
+            } else {
+                console.log('Timer not running');
+            }
+        }
+
+        function resetTimer() {
+            console.log('Resetting timer');
+            clearInterval(stopwatchInterval);
+            stopwatchInterval = null;
+            pausedTime = 0;
+            startTime = null;
+            hoursElement.textContent = '00';
+            minutesElement.textContent = '00';
+            secondsElement.textContent = '00';
+            millisecondsElement.textContent = '000';
+            console.log('Timer reset');
+        }
+
+        function updateTime() {
+            const elapsedTime = Date.now() - startTime;
+            const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+            const minutes = Math.floor((elapsedTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000);
+            const milliseconds = elapsedTime % 1000;
+
+            hoursElement.textContent = padTime(hours);
+            minutesElement.textContent = padTime(minutes);
+            secondsElement.textContent = padTime(seconds);
+            millisecondsElement.textContent = padTime(milliseconds, 3);
+        }
+
+        function padTime(time, length = 2) {
+            return time.toString().padStart(length, '0');
+        }
+
+        // Display current date in a colorful format
+        const dateContainer = document.getElementById('dateContainer');
+        const currentDate = new Date();
+        const dateString = currentDate.toDateString();
+        dateContainer.textContent = dateString;
+        dateContainer.style.color = 'white';
+        dateContainer.style.fontSize = '1.2em';
+        dateContainer.style.marginBottom = '20px';
+    </script>
+</body>
+</html>
